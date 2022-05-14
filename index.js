@@ -26,13 +26,13 @@ app.listen(3000, () => {
     console.log(`Serveris paleistas. Laukia užklausų`);
 });
 
-app.get('/books', (request, response) => {
-    response.json(knygos);
+app.get('/books/:from/:to', (request, response) => {
+    
+    const fromIndex = Number(request.params.from);
+    const toIndex = Number(request.params.to);
+
+    const atgnybtasMasyvas = knygos.slice(fromIndex, toIndex);
+
+    response.json(atgnybtasMasyvas);
 });
 
-app.get('/books/:id', (request, response) => {
-    
-    const knygosPavadinimas = request.params.id;
-    response.json(knygos[request.params.id]);
-        
-});
