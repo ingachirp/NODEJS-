@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 
 const app = express();
-
+app.use(express.json());
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 const uri = 'mongodb+srv://IngridaVIGI13:byuhblf77@cluster0.eipbj.mongodb.net/?retryWrites=true&w=majority';
@@ -25,16 +25,14 @@ app.listen(process.env.PORT, () => {
 
 app.get('/books', (request, response) => {
   client.connect(async () => {
-    const collection = client.db('knygu_projektas').collection('books');
-    const result = await collection.insertOne({
-      name: 'Haris poteris',
-      pageCount: 700,
-    });
-    console.log(result);
+    const database = client.db('knygu_projektas');
+    const collection = database.collection('books');
+    const result = await collection.find({}).toArray();
+
+    response.json(result);
+
     client.close();
   });
-
-  response.json(knygos);
 });
 
 app.get('/books/:id', (request, response) => {
@@ -42,16 +40,16 @@ app.get('/books/:id', (request, response) => {
 });
 
 app.post('/books', (request, response) => {
-  const { bookName } = request.body.bookName;
-  const { bookPageCount } = request.body;
-
   client.connect(async () => {
-    const collection = client.db('knygu_projektas').collection('books');
+    const database = client.db('knygu_projektas');
+    const collection = database.collection('books');
     const result = await collection.insertOne({
-      name: request.book.bookName,
+      name: request.body.bookName,
       pageCount: request.body.bookPageCount,
     });
-    console.log(result);
+
+    response.json(result);
+
     client.close();
   });
 });
