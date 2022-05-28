@@ -1,10 +1,18 @@
 require('dotenv').config();
-
+const cors = require('cors');
+const { response } = require('express');
+const { request } = require('express');
 const express = require('express');
 
 const app = express();
 app.use(express.json());
-const { MongoClient, ServerApiVersion } = require('mongodb');
+app.use(cors());
+
+const {
+  MongoClient,
+  ServerApiVersion,
+  ObjectId,
+} = require('mongodb');
 
 const uri = 'mongodb+srv://IngridaVIGI13:byuhblf77@cluster0.eipbj.mongodb.net/?retryWrites=true&w=majority';
 const client = new MongoClient(uri, {
@@ -13,19 +21,13 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-const knygos = [
-  'Tadas Blinda',
-  'Zaidimu knyga',
-  'Chemijos zinynas',
-];
-
 app.listen(process.env.PORT, () => {
   console.log('Serveris paleistas. Laukia užklausų');
 });
 
 app.get('/books', (request, response) => {
   client.connect(async () => {
-    const database = client.db('knygu_projektas');
+    const database = client.db('DB_CRUD');
     const collection = database.collection('books');
     const result = await collection.find({}).toArray();
 
@@ -35,17 +37,14 @@ app.get('/books', (request, response) => {
   });
 });
 
-app.get('/books/:id', (request, response) => {
-  response.json(knygos[request.params.id]);
-});
-
 app.post('/books', (request, response) => {
   client.connect(async () => {
-    const database = client.db('knygu_projektas');
+    const database = client.db('DB_CRUD');
     const collection = database.collection('books');
     const result = await collection.insertOne({
-      name: request.body.bookName,
-      pageCount: request.body.bookPageCount,
+      title: request.body.title,
+      pageCount: request.body.pageCount,
+      price: request.body.price,
     });
 
     response.json(result);
@@ -54,11 +53,17 @@ app.post('/books', (request, response) => {
   });
 });
 
-app.get('/books/:from/:to', (request, response) => {
-  const fromIndex = Number(request.params.from);
-  const toIndex = Number(request.params.to);
+app.delete('/books', (request, response) => {
+  client.connect(async () => {
+    const database = client.db('DB_CRUD');
+    const collection = database.collection('books');
+    const result = await collection.deleteOne({
+      _id: ObjectId(request.body.id),
+    });
+    client.close();
 
-  const atgnybtasMasyvas = knygos.slice(fromIndex, toIndex);
-
-  response.json(atgnybtasMasyvas);
+    response.json(result);
+  });
 });
+
+// dirba su front-end'u https://knygos.netlify.app/
